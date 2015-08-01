@@ -9,6 +9,7 @@ global class P1_Listener {
 		'{'+
 			'"thx": "Thanks for sending me a GET request",'+
 			'"input": "Your input was: '+req.requestURI.substring(req.requestURI.lastIndexOf('/'))+'"'+
+			'"randomContact" : "'+ getRandomContact() +
 		+'}';
 		return result;
 	}
@@ -20,9 +21,17 @@ global class P1_Listener {
 		String result = 
 		'{'+
 			'"thx": "Thanks for sending me a POST request", '+
-			'"input": "Your input was: "'+req.requestURI.substring(req.requestURI.lastIndexOf('/'))+'"'+
-			'\n==========\n'+req.requestBody.toString()+
+			'"input": "Your input was: "'+req.requestURI.substring(req.requestURI.lastIndexOf('/'))+
+			'\n==========\n'+req.requestBody.toString()+'",'+
+			'"randomContact" : "'+ getRandomContact() +
 		' }';
 		return result;
+	}
+
+	global static String getRandomContact() {
+		Contact c = [SELECT Name, Title, Description FROM Contact LIMIT 1];
+		JSONGenerator jsonGen = JSON.createGenerator(true);
+		jsonGen.writeObject(c);
+		return jsonGen.getAsString();
 	}
 }
