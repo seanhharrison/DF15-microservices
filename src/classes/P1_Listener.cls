@@ -2,36 +2,33 @@
 global class P1_Listener {
 
 	@HttpGet
-	global static String doGet() {
+	global static P1Response doGet() {
 		RestRequest req = RestContext.request;
-		// RestResponse resp = RestContext.response;
-		String result = 
-		'{'+
-			'"thx": "Thanks for sending me a GET request",'+
-			'"input": "Your input was: '+req.requestURI.substring(req.requestURI.lastIndexOf('/'))+'"'+
-			'"randomContact" : "'+ getRandomContact() +
-		+'}';
+		P1Response result = new P1Response(req.requestURI.substring(req.requestURI.lastIndexOf('/')+1), getRandomContact());
 		return result;
 	}
 
 	@HttpPost
-	global static String doPost() {
+	global static P1Response doPost() {
 		RestRequest req = RestContext.request;
-		// RestResponse resp = RestContext.response;
-		String result = 
-		'{'+
-			'"thx": "Thanks for sending me a POST request", '+
-			'"input": "Your input was: "'+req.requestURI.substring(req.requestURI.lastIndexOf('/'))+
-			'\n==========\n'+req.requestBody.toString()+'",'+
-			'"randomContact" : "'+ getRandomContact() +
-		' }';
+		P1Response result = new P1Response(req.requestURI.substring(req.requestURI.lastIndexOf('/')+1), getRandomContact());
+
 		return result;
 	}
 
-	global static String getRandomContact() {
+	global static Contact getRandomContact() {
 		Contact c = [SELECT Name, Title, Description FROM Contact LIMIT 1];
-		JSONGenerator jsonGen = JSON.createGenerator(true);
-		jsonGen.writeObject(c);
-		return jsonGen.getAsString();
+		return c;
+	}
+
+	global with sharing class P1Response {
+		public String thx = 'Thanks for sending me a request';
+		public String input = 'Your input was: ';
+		public Contact randomContact {get; set;}
+
+		public P1Response(String inp, Contact con) {
+			input += inp;
+			randomContact = con;
+		}
 	}
 }
