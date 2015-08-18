@@ -1,38 +1,52 @@
+/**
+ *
+
+ { queue: 'pattern2', message:{device: 'my deviceType', alignment: 'good/evil'} }
+
+from that you should then have your endpoint go:
+pattern2 is the queue, what do we have as the class to instantiate for this (read from a custom setting)
+Instantiate that class (implements the interface) and we call the handleMessage method
+Based upon the device and the alignment return a contact
+Device's would be:
+Android
+iOS
+Opera
+Windows
+Desktop
+I was thinking the alignment thing would be a cool twist so the contact returned would be either a good guy or a bad guy depending on the button they press. Thought you might enjoy creating some interesting character's as well (as a note remember to do both male and female mix).
+
+ *
+ **/
 @RestResource(urlMapping='/P2/*')
 global class P2_Listener {
-
-	@HttpGet
-	global static P2Response doGet() {
-
-		RestRequest req = RestContext.request;
-		String message = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
-
-		Message_Handlers__c handler = Message_Handlers__c.getInstance(message);
-
-		if (handler==null) {
-			P2Response result = new P2Response(message, 'no handler class defined');
-			return result;
-		} else {
-			String className = handler.Class_Name__c;
-
-			Type t = Type.forName(className);
-			GetRandomObj newObj = (GetRandomObj) t.newInstance();
-
-			P2Response result = new P2Response(message, newObj.get());
-			return result;
-		}
-	}
 
 	@HttpPost
 	global static P2Response doPost() {
 
 		RestRequest req = RestContext.request;
-		String message = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
+		String reqBody = req.requestBody.toString();
+		System.debug('PAUL:' + reqBody);
+		JSONParser parser = JSON.createParser(reqBody);
+		Map<String,String> params = new Map<String,String>();
+		while (parser.nextToken() != null) {
+		if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+				String key = parser.getText();
+				parser.nextValue();
+				params.put(key,parser.getText());
+			}
+		}
 
-		Message_Handlers__c handler = Message_Handlers__c.getInstance(message);
+
+// add code to parse as object
+
+// add code to pass params to getObject
+
+// don't parse message until handleMessage()!
+
+		Message_Handlers__c handler = Message_Handlers__c.getInstance(params.get('queue'));
 
 		if (handler==null) {
-			P2Response result = new P2Response(message, 'no handler class defined');
+			P2Response result = new P2Response(reqBody, 'no handler class defined');
 			return result;
 		} else {
 			String className = handler.Class_Name__c;
@@ -40,12 +54,26 @@ global class P2_Listener {
 			Type t = Type.forName(className);
 			GetRandomObj newObj = (GetRandomObj) t.newInstance();
 
-			P2Response result = new P2Response(message, newObj.get());
+			P2Response result = new P2Response(reqBody, newObj.get());
 			return result;
 		}
 	}
 
-	global with sharing class P2Response {
+	global class Queue {
+		public String name {get; set;}
+		public Message params {get; set;}
+		public Queue() {
+		}
+	}
+
+	global class Message {
+		public String device {get; set;}
+		public String alignment {get; set;}
+		public Message() {
+		}
+	}
+
+	global class P2Response {
 		public String thx = 'Thanks for sending me a request';
 		public String input = 'Your input was: ';
 		public Sobject randomObj {get; set;}
