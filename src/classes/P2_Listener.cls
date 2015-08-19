@@ -36,13 +36,6 @@ global class P2_Listener {
 			}
 		}
 
-
-// add code to parse as object
-
-// add code to pass params to getObject
-
-// don't parse message until handleMessage()!
-
 		Message_Handlers__c handler = Message_Handlers__c.getInstance(params.get('queue'));
 
 		if (handler==null) {
@@ -52,26 +45,27 @@ global class P2_Listener {
 			String className = handler.Class_Name__c;
 
 			Type t = Type.forName(className);
-			GetRandomObj newObj = (GetRandomObj) t.newInstance();
+			MessageHandlerInf newObj = (MessageHandlerInf) t.newInstance();
 
-			P2Response result = new P2Response(reqBody, newObj.get());
+			P2Response result = new P2Response(reqBody, newObj.handleMessage(params));
 			return result;
+	return null;
 		}
 	}
 
-	global class Queue {
-		public String name {get; set;}
-		public Message params {get; set;}
-		public Queue() {
-		}
-	}
+	//global class Queue {
+	//	public String name {get; set;}
+	//	public Message params {get; set;}
+	//	public Queue() {
+	//	}
+	//}
 
-	global class Message {
-		public String device {get; set;}
-		public String alignment {get; set;}
-		public Message() {
-		}
-	}
+	//global class Message {
+	//	public String device {get; set;}
+	//	public String alignment {get; set;}
+	//	public Message() {
+	//	}
+	//}
 
 	global class P2Response {
 		public String thx = 'Thanks for sending me a request';
