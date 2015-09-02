@@ -49,23 +49,8 @@ global class P2_Listener {
 
 			P2Response result = new P2Response(reqBody, newObj.handleMessage(params));
 			return result;
-	return null;
 		}
 	}
-
-	//global class Queue {
-	//	public String name {get; set;}
-	//	public Message params {get; set;}
-	//	public Queue() {
-	//	}
-	//}
-
-	//global class Message {
-	//	public String device {get; set;}
-	//	public String alignment {get; set;}
-	//	public Message() {
-	//	}
-	//}
 
 	global class P2Response {
 		public String thx = 'Thanks for sending me a request';
