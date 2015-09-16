@@ -1,0 +1,33 @@
+<apex:page showHeader="true" sidebar="true" controller="P4_Microservice">
+<apex:form>
+	<apex:sectionHeader title="Get a Contact" subtitle="Microservice Demo on App Cloud" />
+	<apex:pageBlock>
+		<apex:pageBlockButtons location="bottom">
+			<apex:commandButton action="{!getContact}" value="Get a Contact" rerender="ContactInfo" />
+		</apex:pageBlockButtons>
+		<apex:pageBlockSection>
+			<apex:selectRadio value="{!alignment}">
+				<apex:selectOptions value="{!items}" />
+			</apex:selectRadio>
+		</apex:pageBlockSection>
+		<apex:pageBlockSection  id="ContactInfo">
+		<apex:outputPanel rendered="{!person!=null}">
+          <div>
+            <h1>{!person.Title}</h1>
+          </div>
+          <div>
+            <h2>{!person.Name}</h2>
+          </div>
+          <div>
+            <img src="{!person.Image__c}" alt="..." />
+          </div>
+          <div>
+            <p>
+              {!person.Description}
+            </p>
+          </div>
+		</apex:outputPanel>
+		</apex:pageBlockSection> 
+	</apex:pageBlock>
+</apex:form>
+</apex:page>

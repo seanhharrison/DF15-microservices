@@ -31,21 +31,18 @@
 
 		p('messagesToProcess: '+messagesToProcess);
 		List<Message_Queue__c> incomingMessages = new List<Message_Queue__c>();
-		List<Message_Queue__c> responseMessages = new List<Message_Queue__c>();
 		List<P4Response> feedback = new List<P4Response>();
 
 		for (Message_Queue__c message : messagesToProcess) {
 			p('message:' + message.Message__c);
 
-			message.Read_Time__c = Datetime.now();
-			incomingMessages.add(message);
 			JSONParser parser = JSON.createParser(message.Message__c);
 			Map<String,String> params = new Map<String,String>();
 			while (parser.nextToken() != null) {
-			if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
-					String key = parser.getText();
-					parser.nextValue();
-					params.put(key,parser.getText());
+				if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+						String key = parser.getText();
+						parser.nextValue();
+						params.put(key,parser.getText());
 				}
 			}
 
@@ -54,9 +51,9 @@
 			p('handler:' + handler.Class_Name__c);
 
 			if (handler==null) {
+				// microservice patterns typically leave alone messages that cannot be processed
 				P4Response result = new P4Response(message.Message__c, 'no handler class defined');
 				feedback.add(result);
-				responseMessages.add(new Message_Queue__c(Queue_Name__c = params.get('responseId')));
 			} else {
 				String className = handler.Class_Name__c;
 
@@ -65,14 +62,13 @@
 
 				P4Response result = new P4Response(message.Message__c, newObj.handleMessage(params));
 				feedback.add(result);
-				Message_Queue__c responseMessage = new Message_Queue__c();
-				responseMessage.Queue_Name__c = params.get('responseId');
-				responseMessage.Message__c = result.randomObj.Id;
-				responseMessages.add(responseMessage);
+				
+				message.Reply__c = '{ "Id": "'+result.randomObj.Id+'"}';
+				message.Read_Time__c = Datetime.now();
+				incomingMessages.add(message);				
 			}		
 		}
 		update incomingMessages;
-		insert responseMessages;
 		return feedback;
 	}
 
